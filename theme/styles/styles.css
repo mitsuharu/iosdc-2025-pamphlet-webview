@@ -27,6 +27,10 @@
   white-space: nowrap;
 }
 
+h1 {
+  text-align: center;
+}
+
 .profile-container {
   display: flex;
   justify-content: flex-end;
@@ -37,7 +41,7 @@
 
 .profile-icon {
   width: auto;
-  height: 60px; /* アイコンの高さ。テキストエリアに対して可変にしたいが、よく分からん */
+  height: 30px; /* アイコンの高さ。テキストエリアに対して可変にしたいが、よく分からん */
   margin-right: 10px;
 }
 
