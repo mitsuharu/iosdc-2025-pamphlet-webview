@@ -380,12 +380,53 @@ private func setUpWebView() {
 
 ![スクリーンショット 2025-03-06 18.45.39.png](images/b9393522-e992-42ee-acbe-9ceb6fbdaed7.jpeg)
 
+## 拡大率の考慮
+
+iOS には多くのアクセシビリティ機能が用意されており、その１つに「拡大表示（Display Zoom）」があります。この機能は、システム全体のスケーリング倍率を高め、画面上に表示される要素を視認しやすくします。iPhone の初期セットアップ時や、「設定」アプリ内の「画面表示と明るさ」から有効化できます。
+
+### 拡大表示とWKWebViewの表示崩れ
+
+WKWebView は標準コンポーネントのレンダリングとは異なります。HTML や CSS で定義されたコンポーネントは WebKit によってレンダリングされます。このレンダリング処理は、iOS のネイティブとは別に動作しているため、拡大設定がそのまま反映されるわけではありません。
+
+たとえば、iPhone 16 における Retina 倍率はデフォルトでは 3 倍ですが、拡大表示を有効にすると約 3.68 倍になり、画面全体の座標系は変化します。`.box { width: 300px; height: 200px;}` のように、CSS でサイズ固定していると問題が起こります。想定する領域を越えて、文字や画像が切れてしまいます。
+
+|デフォルト|拡大表示|
+|:-:|:-:|
+|![native-scale-01-a](./images/native-scale-01-a.jpg) | ![native-scale-02-a](./images/native-scale-02-a.jpg)|
+
+### 実機の拡大状態を取得する
+
+アプリで実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、UIScreen.main は Deprecated ですが、説明の簡略化のため利用しました。実際に利用する際は、適切に置き換えてください。
+
+```swift
+let scale = UIScreen.main.scale             // Retina 倍率
+let nativeScale = UIScreen.main.nativeScale // 実際の倍率
+```
+
+HTML/CSS では端末の Retina 倍率を取得できますが、実際の倍率は取得できません。つまり、nativeScale を WebView に渡さないといけません。例として、アプリ側でサイズを補正します。
+
+```swift
+let baseSize = CGSize(width: 300, height: 200)
+let scale = UIScreen.main.scale/UIScreen.main.nativeScale
+let width = Int(baseSize.width * scale)
+let height = Int(baseSize.height * scale)
+```
+
+そして、その補正したサイズを WebView に注入します。
+
+```css
+.box {
+    width: \(width)px;
+    height: \(height)px;
+}
+```
+
+他にも、倍率を JavaScript 関数で渡して、HTML 内で補正する手段もあります。このように、アプリで得られた情報を WebView に渡すことで、HTML/CSS 側での補正処理をサポートします。
+
 ## まとめ
 
 本記事は iOS アプリに WKWebView を組み込んだときに、起こりうる問題とその解決方法を紹介しました。今回の実装例は次のリポジトリにあります。
 
 https://github.com/mitsuharu/SampleWKWebViewApp
 
-WKWebView はネイティブのコンポーネントといえど、内部は Web の世界が広がっています。今回紹介した以外にも HTML 固有の問題が起こることもあり、WKWebView を利用した開発は大変です。分からない原因で悩み、なぜかアレコレしたら治ったこともあります。WKWebView、ムズい…
-
-みなさんも WKWebView に関する知見の記事を書いてくださいね。
+WKWebView はネイティブのコンポーネントといえど、内部は Web の世界が広がっています。今回紹介した以外にも HTML 固有の問題が起こることもあり、WKWebView を利用した開発は大変です。分からない原因で悩み、なぜかアレコレしたら治ったこともあります。WKWebView、難しい。
