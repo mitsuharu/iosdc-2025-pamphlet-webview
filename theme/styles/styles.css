@@ -53,8 +53,8 @@ h1 {
 }
 
 .profile-text-main {
-  font-size: 1.1em;
-  font-weight: bold;
+  font-size: 1em;
+  font-weight: normal;
   word-wrap: break-word;
   white-space: nowrap;
 }
