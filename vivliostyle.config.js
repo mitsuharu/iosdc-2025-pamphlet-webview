@@ -1,6 +1,6 @@
 module.exports = {
-  title: 'タイトル名',
-  author: '著者名',
+  title: 'モバイルアプリ開発者のための WebView と JavaScript の制御実践',
+  author: '江本光晴',
   language: 'ja',
   size: 'A4',
   theme: [
