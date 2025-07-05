@@ -1103,6 +1103,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@textlint-ja/textlint-rule-preset-ai-writing@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@textlint-ja/textlint-rule-preset-ai-writing@npm:1.4.0"
+  dependencies:
+    "@textlint/regexp-string-matcher": "npm:^2.0.2"
+    textlint-util-to-string: "npm:^3.3.4"
+  checksum: 10c0/b5bee3cb1966926a91e3ad402ecc9bc8a349ee5ed44feaadb1bcf22d1b90d4083908dee3063195b967714b0d38bc05fa040949da39132b3cb76a5a3477594bfe
+  languageName: node
+  linkType: hard
+
 "@textlint-rule/textlint-rule-no-invalid-control-character@npm:^3.0.0":
   version: 3.0.0
   resolution: "@textlint-rule/textlint-rule-no-invalid-control-character@npm:3.0.0"
@@ -4319,6 +4329,7 @@ __metadata:
   resolution: "iosdc-pamphlet-template@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.0.6"
+    "@textlint-ja/textlint-rule-preset-ai-writing": "npm:^1.4.0"
     "@vivliostyle/cli": "npm:9.3.3"
     press-ready: "npm:^4.0.3"
     textlint: "npm:^15.1.0"
