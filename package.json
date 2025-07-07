@@ -20,7 +20,7 @@
     "@biomejs/biome": "2.0.6",
     "@textlint-ja/textlint-rule-preset-ai-writing": "^1.4.0",
     "press-ready": "^4.0.3",
-    "textlint": "^15.1.0",
+    "textlint": "^15.2.0",
     "textlint-filter-rule-comments": "^1.2.2",
     "textlint-rule-preset-ja-spacing": "^2.4.3",
     "textlint-rule-preset-ja-technical-writing": "^12.0.2",
