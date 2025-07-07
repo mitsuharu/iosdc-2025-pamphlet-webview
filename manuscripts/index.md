@@ -1,19 +1,18 @@
 # モバイルアプリ開発者のための<BR />WebView と JavaScript の制御実践
 
-<div class="author-info">
+<!-- <div class="author-info">
 江本光晴（株式会社ゆめみ）<BR />
-𝕏: @mitsuharu_e
-</div>
+𝕏 @mitsuharu_e
+</div> -->
 
 <!-- アイコン付き著者プロフィール -->
-<!-- <div class="profile-container">
+<div class="profile-container">
   <img src="./images/icon.png" alt="アイコン" class="profile-icon" />
   <div class="profile-text-area">
-  <div class="profile-text-main">江本光晴（株式会社ゆめみ）</div>
-  <div class="profile-text-sub">株式会社サンプル</div>
-  <div class="profile-text-sub">𝕏: @mitsuharu_e</div>
+  <div class="profile-text-main">江本光晴</div>
+  <div class="profile-text-sub">株式会社ゆめみ / 𝕏 @mitsuharu_e</div>
   </div>
-</div> -->
+</div>
 
 次のような理由などで、モバイルアプリに WebView を組み込んで HTML を表示させることがあるでしょう。
 
