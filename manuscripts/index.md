@@ -344,7 +344,7 @@ WKWebView は標準コンポーネントのレンダリングとは異なりま�
 |:-:|:-:|
 |![native-scale-01-a](./images/native-scale-01-a.jpg) | ![native-scale-02-a](./images/native-scale-02-a.jpg)|
 
-実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、UIScreen.main は Deprecated ですが、説明の簡略化のため利用しました。ご了承ください。
+実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、すでに UIScreen.main は Deprecated ですが、残りページ数調整と説明簡略化のために利用しました。ご了承ください。
 
 ```swift
 let retinaScale = UIScreen.main.scale       // Retina 倍率
@@ -364,11 +364,11 @@ let scaledSize = CGSize(width: 300 * scale, height: 200 * scale)
 .box { width: \(scaledSize.width)px; height: \(scaledSize.height)px; }
 ```
 
-他にも、nativeScale を JavaScript 関数で渡して、HTML 内で補正する手段もあるでしょう。
+他にも、nativeScale を JS 関数で渡して HTML 側で補正する手段もあります。FE の方と相談しましょう。
 
 ## まとめ
 
-本記事は iOS アプリに WKWebView を組み込んだときに、起こりうる問題とその解決方法を紹介しました。今回の実装例は次のリポジトリにあります。WKWebView を利用する開発、難しい…
+iOS アプリに WKWebView を組み込む際に起こりうる問題とその解決方法を紹介しました。今回の実装例は次のリポジトリにあります。本記事の内容が皆様の開発のお役に立てば幸いです。WKWebView、難しい…
 
 ```url
 https://github.com/mitsuharu/SampleWKWebViewApp
