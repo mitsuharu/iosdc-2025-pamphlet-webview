@@ -14,7 +14,7 @@
   </div>
 </div>
 
-次のような理由などで、モバイルアプリに WebView を組み込んで HTML を表示させることがあるでしょう。
+次のような理由などから、モバイルアプリに WebView を組み込んで HTML を表示させることがあるでしょう。
 
 - 既存サービス等の HTML ファイルを活用する
 - 最軽量かつ最小限のクロスプラットフォームとして、iOS と Android で機能と表示を共通化する
@@ -56,7 +56,7 @@
 この HTML を iOS アプリに組み込んで、JavaScript の関数を実行してテキスト表示を制御したいです。この場合、次のような Swift 関数を実装すれば、アプリから JavaScript 関数を実行できます。なお、この関数内の webView は WKWebView のインスタンスです。
 
 ```swift
-func setWebViewText(text: String) {
+func updateWebViewText(with text: String) {
   let code = """
   const text = "\(text)";
   window.setText(text);
@@ -69,7 +69,7 @@ func setWebViewText(text: String) {
 }
 ```
 
-この関数 `setWebViewText(text:)` を利用すれば、JavaScript 関数が実行されて表示制御されます。しかしながら、この関数は、いくつかの問題が抱えています。この関数を安心して使えるようにしましょう。
+この関数 `updateWebViewText(with:)` を利用すれば、JavaScript 関数が実行されて表示制御されます。しかしながら、この関数は、いくつかの問題が抱えています。この関数を安心して使えるようにしましょう。
 
 以降で説明する内容は iOS / Swift 側の実装を対象として、次の３つの自作関数を軸に説明します。なお、HTML 側の修正や編集は行いません。
 
@@ -77,7 +77,7 @@ func setWebViewText(text: String) {
 | :-- | :-- |
 | setUpWebView() | webView の初期化や addSubView(_:) などを行う |
 | loadWebView() | webView で HTML ファイル（index.html）を読み込む |
-| setWebViewText(text: ) | アプリから JavaScript 関数を実行して、文字を表示する |
+| updateWebViewText(with:) | アプリから JavaScript 関数を実行して、文字を更新する |
 
 ## 関数の呼び出しタイミング
 
@@ -99,7 +99,7 @@ func loadWebView() {
 ```swift
 setUpWebView() // webView の初期設定
 loadWebView()  // html の読み込み
-setWebViewText(text: "こんにちは、iOSDC Japan 2025")
+updateWebViewText(with: "こんにちは、iOSDC Japan 2025")
 ```
 
 次のようなエラーが JavaScript 側で発生しました。
@@ -121,7 +121,7 @@ extension ViewController {
     super.viewDidLoad()
     setUpWebView()
     loadWebView()
-    setWebViewText(text: "こんにちは didFinish 前の世界") // JS で失敗する
+    updateWebViewText(with: "こんにちは didFinish 前の世界") // JS で失敗する
   }
   
   // webView を初期設定する関数
@@ -138,7 +138,7 @@ extension ViewController: WKNavigationDelegate {
 
   // 読込み完了
   public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-    setWebViewText(text: "こんにちは didFinish 後の世界") // JS で成功する
+    updateWebViewText(with: "こんにちは didFinish 後の世界") // JS で成功する
   }
 
   // 読込み失敗
@@ -208,7 +208,7 @@ extension ViewController: WKScriptMessageHandler {
 
 ## JavaScript に渡す文字列のエンコード
 
-関数 `setWebViewText(text:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"`, `\`など）が含まれていると、エラーになります。
+関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"`, `\`など）が含まれていると、エラーになります。
 
 ```javascript
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
@@ -221,7 +221,7 @@ NSLocalizedDescription=A JavaScript exception occurred}
 Swift と JavaScript で一部文字の扱いが異なるため、解釈不一致が起こっています。これを防ぐため、文字列をエスケープしてから渡します。そして、JavaScript のコードではアンエスケープした文字列を利用します。
 
 ```swift
-func setWebViewText(text: String) {
+func updateWebViewText(with text: String) {
   guard let encodedText = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
     return
   }
@@ -245,8 +245,8 @@ func setWebViewText(text: String) {
 例で挙げた更新関数の実行は一度きりとは限らず、任意なタイミングや回数で実行されるでしょう。たとえば、次のように、関数を連続して実行します。
 
 ```swift
-setWebViewText(text: "テキスト１")
-setWebViewText(text: "テキスト２")
+updateWebViewText(with: "テキスト１")
+updateWebViewText(with: "テキスト２")
 ```
 
 残念ながら、この場合もエラーが起こります。
@@ -262,11 +262,11 @@ A JavaScript exception occurred}
 この連続した関数の実行は、webView では次のようなに解釈されます。同じスコープで実行されています。つまり、同名定数が再定義されたため、JavaScript でエラーが起こりました。
 
 ```swift
-// Swift で setWebViewText(text: "テキスト１") を実行した
+// Swift で updateWebViewText(with: "テキスト１") を実行した
 const text = decodeURIComponent("テキスト１");
 window.setText(text);
 
-// Swift で setWebViewText(text: "テキスト２") を実行した
+// Swift で updateWebViewText(with: "テキスト２") を実行した
 const text = decodeURIComponent("テキスト２"); // 同名定数の再定義！
 window.setText(text);
 ```
@@ -274,7 +274,7 @@ window.setText(text);
 ２つ目の定数 text を別名に変えれば実行できますが、実行ごとにユニークな命名をするのは不可能です。そこで、関数を実行するスコープを分けることで回避します。
 
 ```swift
-func setWebViewText(text: String) {
+func updateWebViewText(with text: String) {
   guard let encodedText = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
     return
   }
@@ -301,7 +301,7 @@ func setWebViewText(text: String) {
 これまでの例は実行するだけで、その実行結果を取得していません。実行順序が重要な場合やエラー結果を取得したい場合もあるでしょう。そこで、Swift Concurrency を使って、非同期関数にします。
 
 ```swift
-func setWebViewText(text: String) async throws {
+func updateWebViewText(with text: String) async throws {
   // 略...
   try await withCheckedThrowingContinuation { [weak self] continuation in
     guard let webView = self?.webView else { return }
@@ -319,12 +319,12 @@ func setWebViewText(text: String) async throws {
 次のように、順番ごとに実行されます。
 
 ```swift
-func setWebViewTextSequence() {
+func updateWebViewTextSequence() {
   Task { @MainActor in
     do {
-      try await setWebViewText(text: "await 1")
-      try await setWebViewText(text: "await 2")
-      try await setWebViewText(text: "await 3")
+      try await updateWebViewText(with: "await 1")
+      try await updateWebViewText(with: "await 2")
+      try await updateWebViewText(with: "await 3")
     } catch {
       print(error)
     }
