@@ -344,7 +344,7 @@ WKWebView は標準コンポーネントのレンダリングとは異なりま�
 |:-:|:-:|
 |![native-scale-01-a](./images/native-scale-01-a.jpg) | ![native-scale-02-a](./images/native-scale-02-a.jpg)|
 
-実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、すでに UIScreen.main は Deprecated ですが、残りページ数調整と説明簡略化のために利用しました。ご了承ください。
+実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、すでに UIScreen.main は Deprecated ですが、残り余白は正確に書くには狭すぎるので、利用しました。ご了承ください。
 
 ```swift
 let retinaScale = UIScreen.main.scale       // Retina 倍率
