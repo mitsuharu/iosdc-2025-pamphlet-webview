@@ -9,21 +9,23 @@
 <div class="profile-container">
   <img src="./images/icon.png" alt="アイコン" class="profile-icon" />
   <div class="profile-text-area">
-  <div class="profile-text-main">江本光晴</div>
-  <div class="profile-text-sub">株式会社ゆめみ / 𝕏 @mitsuharu_e</div>
+  <div class="profile-text-main">江本光晴 / 𝕏 @mitsuharu_e</div>
+  <div class="profile-text-sub">株式会社ゆめみ</div>
   </div>
 </div>
 
-次のような理由などから、モバイルアプリに WebView を組み込んで HTML を表示させることがあるでしょう。
+次のような理由などから、モバイルアプリに WebView を組み込んで HTML ファイルを表示させることがあるでしょう。
 
 - 既存サービス等の HTML ファイルを活用する
 - 最軽量かつ最小限のクロスプラットフォームとして、iOS と Android で機能と表示を共通化する
 
-モバイルアプリエンジニアは、必ずしも HTML や JavaScript に詳しいわけではないため、実装上の問題に直面することも少なくありません。今回は iOS アプリで WKWebView を組み込んだときの問題点や、その解決方法を紹介します。
+この場合、単純に HTML を表示するだけとは限りません。JavaScript などを利用してアプリからパラメータを渡すなど、外部から HTML を制御することでしょう。
+
+ここで、モバイルアプリエンジニアは、必ずしも HTML や JavaScript に詳しいわけではありません。この実装を進めると、問題に直面することも少なくありません。今回は iOS アプリで WKWebView を組み込んで、JavaScript で制御するときの問題点や、その解決方法を紹介します。
 
 ## 環境
 
-本記事の開発環境は、MacBook Pro 14 インチ 2021 / Apple M1 Pro / メモリ 32 GB / macOS Sequoia 15.5 です。Xcode 16.2 で検証しています。Swift だけでなく、JavaScript なども利用しています。ここで、JavaScript は JS と表記する場合もあります。
+本記事の開発環境は、MacBook Pro 14 インチ 2021 / Apple M1 Pro / メモリ 32 GB / macOS Sequoia 15.5 です。Xcode 16.2 で検証しています。ソースコードの説明に Swift だけでなく、JavaScript なども利用します。ここで、JavaScript は JS と表記する場合もあります。
 
 ## 問題設定
 
@@ -81,11 +83,13 @@ func updateWebViewText(with text: String) {
 
 ## 関数の呼び出しタイミング
 
-webView で HTML ファイル（index.html）を読み込むには、次のような実装で実現できます。
+WKWebView で HTML ファイル（index.html）を読み込むには、次のような実装で実現できます。
 
 ```swift
 func loadWebView() {
-  guard let url = Bundle.main.url(forResource: "index", withExtension: "html") else {
+  guard let url = Bundle.main.url(forResource: "index", 
+                                  withExtension: "html")
+  else {
     assertionFailure("index.html is not found.")
     return
   }
@@ -94,7 +98,7 @@ func loadWebView() {
 }
 ```
 
-準備ができたら、関数それぞれを実行していきます。HTML を読み込んだ WebView が表示されて「こんにちは、iOSDC Japan 2025」という文字が表示されるはずですが、エラーが発生します。
+準備ができたら、次のように関数それぞれを実行していきます。HTML を読み込んだ WebView が表示されて「こんにちは、iOSDC Japan 2025」という文字が表示されるはずですが、エラーが発生します。
 
 ```swift
 setUpWebView() // webView の初期設定
@@ -108,7 +112,7 @@ updateWebViewText(with: "こんにちは、iOSDC Japan 2025")
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
 UserInfo={WKJavaScriptExceptionLineNumber=2, WKJavaScriptExceptionMessage
 =TypeError: window.setText is not a function. (In 'window.setText(text)',
-'window.setText'　is undefined), WKJavaScriptExceptionColumnNumber=19,
+'window.setText' is undefined), WKJavaScriptExceptionColumnNumber=19,
 WKJavaScriptExceptionSourceURL=undefined, NSLocalizedDescription=
 A JavaScript exception occurred}
 ```
@@ -136,23 +140,23 @@ extension ViewController {
 ```swift
 extension ViewController: WKNavigationDelegate {
 
-  // 読込み完了
+  // 読込み完了のデリゲート関数
   public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     updateWebViewText(with: "こんにちは didFinish 後の世界") // JS で成功する
   }
 
-  // 読込み失敗
+  // 読込み失敗のデリゲート関数
   public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
     print("didFail \(error)")
   }
 }
 ```
 
-HTML に組み込まれた関数を実行する場合、その HTML の読み込みが完了してから実行します。この例では、完了通知のデリゲート内で実行しました。その他、任意なタイミングで実行する場合は完了状態（関数実行可能）フラグを変数に保存して、制御しましょう。
+HTML に組み込まれた関数を実行する場合、その HTML の読み込みが完了してから実行します。この例では、完了通知のデリゲート内で実行しました。その他、任意なタイミングで実行する場合は読み込み完了の状態（関数実行可能フラグ）を保存して制御するのもよいでしょう。
 
 ### 完了イベントが独自の場合
 
-HTML の実装や関数の特性によってはライフサイクルが独自なものもあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認しましょう）。独自イベントを HTML に実装する例はページが足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
+HTML の実装や関数の特性によってはライフサイクルが独自なものもあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。独自イベントを HTML に実装するには余白が足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
 
 ```swift
 extension ViewController {
@@ -199,7 +203,8 @@ extension ViewController {
 
 extension ViewController: WKScriptMessageHandler {
   func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-    print("didReceive \(message.name), \(message.body),")
+    print("didReceive, \(message.name), \(message.body)")
+    // body に含まれるイベント名を判定して、適切に処理する
   }
 }
 ```
@@ -208,7 +213,7 @@ extension ViewController: WKScriptMessageHandler {
 
 ## JavaScript に渡す文字列のエンコード
 
-関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"`, `\`など）が含まれていると、エラーになります。
+関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"`, `\n`など）が含まれていると、エラーになります。
 
 ```javascript
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
@@ -286,6 +291,9 @@ func updateWebViewText(with text: String) {
     throw error
   }
   """
+```
+
+```swift
   webView.evaluateJavaScript(code) { _, error in
     if let error {
       print(error)
