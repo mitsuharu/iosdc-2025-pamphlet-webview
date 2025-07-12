@@ -14,12 +14,12 @@
   </div>
 </div>
 
-次のような理由などから、モバイルアプリに WebView を組み込んで HTML ファイルを表示させることがあるでしょう。
+次のような目的などから、モバイルアプリに WebView を組み込んで HTML ファイルを表示させることがあるでしょう。
 
 - 既存サービス等の HTML ファイルを活用する
 - 最軽量かつ最小限のクロスプラットフォームとして、iOS と Android で機能と表示を共通化する
 
-この場合、単純に HTML を表示するだけとは限りません。JavaScript などを利用してアプリからパラメータを渡すなど、外部から HTML を制御することでしょう。
+この場合、単純に HTML を表示するだけとは限りません。JavaScript などを利用してアプリからパラメータを渡すなど、外部から HTML を制御することがあります。
 
 ここで、モバイルアプリエンジニアは、必ずしも HTML や JavaScript に詳しいわけではありません。この実装を進めると、問題に直面することも少なくありません。今回は iOS アプリで WKWebView を組み込んで、JavaScript で制御するときの問題点や、その解決方法を紹介します。
 
@@ -55,7 +55,7 @@
 
 ![HTML の動作例](./images/html-demo.png)
 
-この HTML を iOS アプリに組み込んで、JavaScript の関数を実行してテキスト表示を制御したいです。この場合、次のような Swift 関数を実装すれば、アプリから JavaScript 関数を実行できます。なお、この関数内の webView は WKWebView のインスタンスです。
+この HTML を iOS アプリに組み込んで、JavaScript の関数を実行してテキスト表示を制御します。この場合、次のような Swift 関数を実装すれば、アプリから JavaScript 関数を実行できます。なお、この関数内の webView は WKWebView のインスタンスです。
 
 ```swift
 func updateWebViewText(with text: String) {
@@ -77,8 +77,8 @@ func updateWebViewText(with text: String) {
 
 | 関数名 | 目的 |
 | :-- | :-- |
-| setUpWebView() | webView の初期化や addSubView(_:) などを行う |
-| loadWebView() | webView で HTML ファイル（index.html）を読み込む |
+| setUpWebView() | WKWebView の初期化や addSubView(_:) などを行う |
+| loadWebView() | WKWebView で HTML ファイル（index.html）を読み込む |
 | updateWebViewText(with:) | アプリから JavaScript 関数を実行して、文字を更新する |
 
 ## 関数の呼び出しタイミング
@@ -117,7 +117,7 @@ WKJavaScriptExceptionSourceURL=undefined, NSLocalizedDescription=
 A JavaScript exception occurred}
 ```
 
-このエラーは `'window.setText' is undefined` と書かれているとおり、定義したはずの関数が未定義になっています。HTML の読み込みが完了しないと、定義された関数は利用できません。そこで、読み込み完了を待ってから、関数を実行します。
+このエラーは `'window.setText' is undefined` と書かれているとおり、定義したはずの関数が未定義になっているのが原因です。HTML の読み込みが完了しないと、定義された関数は利用できません。そこで、読み込み完了を待ってから、関数を実行します。
 
 ```swift
 extension ViewController {
@@ -140,21 +140,21 @@ extension ViewController {
 ```swift
 extension ViewController: WKNavigationDelegate {
 
-  // 読込み完了のデリゲート関数
+  // 読み込み完了のデリゲート関数
   public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     updateWebViewText(with: "こんにちは didFinish 後の世界") // JS で成功する
   }
 
-  // 読込み失敗のデリゲート関数
+  // 読み込み失敗のデリゲート関数
   public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: any Error) {
     print("didFail \(error)")
   }
 }
 ```
 
-HTML に組み込まれた関数を実行する場合、その HTML の読み込みが完了してから実行します。この例では、完了通知のデリゲート内で実行しました。その他、任意なタイミングで実行する場合は読み込み完了の状態（関数実行可能フラグ）を保存して制御するのもよいでしょう。
+HTML に組み込まれた関数を実行するには、その HTML の読み込みが完了してから実行します。この例では、完了通知のデリゲート関数で実行しました。その他、任意なタイミングで実行する場合は読み込み完了の状態（関数実行可能フラグ）を保存して制御するのもよいでしょう。
 
-### 完了イベントが独自の場合
+### 読み込み完了イベントが独自の場合
 
 HTML の実装や関数の特性によってはライフサイクルが独自なものもあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。独自イベントを HTML に実装するには余白が足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
 
@@ -177,7 +177,8 @@ extension ViewController {
       window.webkit.messageHandlers.\(eventName).postMessage(jsonString);
     });
     window.addEventListener('error', (event) => {
-      const message = {type: 'onError', message: event.error?.message ?? event.message};
+      const message = {type: 'onError',
+                       message: event.error?.message ?? event.message};
       const jsonString = JSON.stringify(message);
       window.webkit.messageHandlers.\(eventName).postMessage(jsonString);
     });
@@ -209,11 +210,11 @@ extension ViewController: WKScriptMessageHandler {
 }
 ```
 
-このように、アプリから JavaScript のコードを webView に埋め込むことで、HTML のイベントをアプリが取得できます。この注入は、HTML/CSS の簡単な機能追加や修正などにも利用できます。
+このように、アプリから JavaScript のコードを WebView に埋め込むことで、HTML のイベントをアプリが取得できます。この注入は、HTML/CSS の簡単な機能追加や修正などにも利用できます。
 
 ## JavaScript に渡す文字列のエンコード
 
-関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"`, `\n`など）が含まれていると、エラーになります。
+関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"` や `\n` など）が含まれていると、エラーになります。
 
 ```javascript
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
@@ -264,7 +265,7 @@ WKJavaScriptExceptionColumnNumber=0, NSLocalizedDescription=
 A JavaScript exception occurred}
 ```
 
-この連続した関数の実行は、webView では次のようなに解釈されます。同じスコープで実行されています。つまり、同名定数が再定義されたため、JavaScript でエラーが起こりました。
+この連続した関数の実行は、WebView では次のように解釈されます。同じスコープで実行されています。つまり、同名定数が再定義されたため、JavaScript でエラーが起こりました。
 
 ```swift
 // Swift で updateWebViewText(with: "テキスト１") を実行した
@@ -359,7 +360,7 @@ let retinaScale = UIScreen.main.scale       // Retina 倍率
 let nativeScale = UIScreen.main.nativeScale // 実際の倍率
 ```
 
-HTML は端末の Retina 倍率を取得できますが、実際の倍率は取得できません。つまり、nativeScale の情報を webView に渡さないといけません。例として、アプリ側でサイズを補正します。
+HTML は端末の Retina 倍率を取得できますが、実際の倍率は取得できません。つまり、nativeScale の情報を WebView に渡さないといけません。例として、アプリ側でサイズを補正します。
 
 ```swift
 let scale = retinaScale / nativeScale
