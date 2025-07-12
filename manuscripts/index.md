@@ -9,8 +9,8 @@
 <div class="profile-container">
   <img src="./images/icon.png" alt="アイコン" class="profile-icon" />
   <div class="profile-text-area">
-  <div class="profile-text-main">江本光晴 / 𝕏 @mitsuharu_e</div>
-  <div class="profile-text-sub">株式会社ゆめみ</div>
+  <div class="profile-text-main">江本光晴</div>
+  <div class="profile-text-sub">株式会社ゆめみ / 𝕏 @mitsuharu_e</div>
   </div>
 </div>
 
