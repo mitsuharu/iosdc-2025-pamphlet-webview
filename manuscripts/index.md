@@ -345,9 +345,9 @@ func updateWebViewTextSequence() {
 
 iOS には多くのアクセシビリティ機能が用意されており、その１つに「拡大表示（Display Zoom）」があります。この機能は、システム全体のスケーリング倍率を高め、画面上に表示される要素を視認しやすくします。iPhone の初期セットアップ時や、「設定」アプリ内の「画面表示と明るさ」から有効化できます。
 
-WKWebView は標準コンポーネントのレンダリングとは異なります。HTML や CSS で定義されたコンポーネントは WebKit によってレンダリングされます。このレンダリング処理は、iOS のネイティブとは別に動作しているため、拡大設定がそのまま反映されるわけではありません。
+WKWebView は標準コンポーネントのレンダリングとは異なります。WebView におけるコンポーネントは HTML や CSS で定義され、WebKit によってレンダリングされます。
 
-たとえば、iPhone 16 における Retina 倍率はデフォルトでは 3 倍ですが、拡大表示を有効にすると約 3.68 倍になり、画面全体の座標系が変化します。`.box { width: 300px; height: 200px;}` のように、CSS でサイズ固定していると問題が起こります。想定する領域を越えて、文字や画像が見切れます。
+たとえば iPhone 16 において、Retina 倍率はデフォルトでは 3 倍ですが、拡大表示を有効にすると約 3.68 倍になり、座標系が 393×852 から 320×693 に変化します。悪い例ですが、CSS で `.box { width: 380px; height: 160px;}` のようにサイズ固定していると、次のように見切れることがあります。
 
 |デフォルト表示（正常）|拡大表示（見切れ）|
 |:-:|:-:|
@@ -360,11 +360,11 @@ let retinaScale = UIScreen.main.scale       // Retina 倍率
 let nativeScale = UIScreen.main.nativeScale // 実際の倍率
 ```
 
-HTML は端末の Retina 倍率を取得できますが、実際の倍率は取得できません。つまり、nativeScale の情報を WebView に渡さないといけません。例として、アプリ側でサイズを補正します。
+HTML は端末の Retina 倍率を取得できますが、実際の倍率は取得できません。したがって、アプリから nativeScale の情報を WebView に渡します。例として、アプリ側でサイズを補正します。
 
 ```swift
 let scale = retinaScale / nativeScale
-let scaledSize = CGSize(width: 300 * scale, height: 200 * scale)
+let scaledSize = CGSize(width: 380 * scale, height: 160 * scale)
 ```
 
 そして、その補正されたサイズを CSS に注入します。
@@ -373,7 +373,9 @@ let scaledSize = CGSize(width: 300 * scale, height: 200 * scale)
 .box { width: \(scaledSize.width)px; height: \(scaledSize.height)px; }
 ```
 
-他にも、nativeScale を JS 関数で渡して HTML 側で補正する手段もあります。FE の方と相談しましょう。
+他にも、nativeScale を JS 関数で渡して HTML 側で補正する手段もあります。
+
+例として、作りが悪い CSS を挙げました。一般に座標サイズが異なっても CSS で調整できます。HTML/CSS で固定サイズが必須な場合は、アプリの仕様から見切れることがあるので、FE エンジニアに相談しましょう。
 
 ## まとめ
 
