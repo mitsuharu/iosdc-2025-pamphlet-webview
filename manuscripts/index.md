@@ -156,12 +156,12 @@ HTML に組み込まれた関数を実行するには、その HTML の読み込
 
 ### 読み込み完了イベントが独自の場合
 
-HTML の実装や関数の特性によってはライフサイクルが独自なものもあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。独自イベントを HTML に実装するには余白が足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
+HTML の実装や関数の特性によってはライフサイクルが独自な場合もあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。独自イベントを HTML に追加実装するには余白が足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
 
 ```swift
 extension ViewController {
   private func setUpWebView() {
-    // アプリで対応できるイベント名を設定する
+    // アプリで対応するイベント名を設定する
     let eventName = "yourEventName"
     
     let contentController = WKUserContentController()
@@ -204,8 +204,8 @@ extension ViewController {
 
 extension ViewController: WKScriptMessageHandler {
   func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-    print("didReceive, \(message.name), \(message.body)")
-    // body に含まれるイベント名を判定して、適切に処理する
+    // message.name はイベント受け取りで設定した eventName に対応する
+    // message.body はメッセージ本文であり、この情報を利用してアプリで処理する
   }
 }
 ```
@@ -214,7 +214,7 @@ extension ViewController: WKScriptMessageHandler {
 
 ## JavaScript に渡す文字列のエンコード
 
-関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。渡す文字列に特殊文字（`"` や `\n` など）が含まれていると、エラーになります。
+関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。その渡す文字列に特殊文字（`"` や `\n` など）が含まれていると、エラーになります。
 
 ```javascript
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
@@ -244,11 +244,11 @@ func updateWebViewText(with text: String) {
 }
 ```
 
-今回の例は文字列を渡してますが、オブジェクトを渡したい場合もあるでしょう。Swift と JavaScript でオブジェクトは異なるので、オブジェクトを渡すことはできません。その場合、オブジェクトを JSON 文字列に変換して、Swift から JavaScript に渡します。そして、JavaScript 側でオブジェクトに戻して利用します。このときもエスケープ・アンエスケープを忘れずに行いましょう。
+例では文字列を渡しましたが、オブジェクトを渡したい場合もあるでしょう。Swift と JavaScript で、オブジェクトは異なるので、直接渡すことはできません。その場合、オブジェクトを JSON 文字列に変換して、Swift から JavaScript に渡します。そして、JavaScript 側でオブジェクトに戻して利用します。このときも文字列変換を忘れずに行います。なお、複雑なオブジェクトは不向きなので、関数設計は注意しましょう。
 
 ## 関数実行のスコープ
 
-例で挙げた更新関数の実行は一度きりとは限らず、任意なタイミングや回数で実行されるでしょう。たとえば、次のように、関数を連続して実行します。
+例で挙げた更新関数の実行は一度きりとは限らず、任意なタイミングや複数回で実行されるでしょう。たとえば、次のように、関数を連続して実行します。
 
 ```swift
 updateWebViewText(with: "テキスト１")
@@ -353,11 +353,11 @@ WKWebView は標準コンポーネントのレンダリングとは異なりま�
 |:-:|:-:|
 |![native-scale-01-a](./images/native-scale-01-a.jpg) | ![native-scale-02-a](./images/native-scale-02-a.jpg)|
 
-実際の拡大倍率を取得するには、UIScreen.main.nativeScale を利用します。ここで、すでに UIScreen.main は Deprecated ですが、残り余白は正確に書くには狭すぎるので、利用しました。ご了承ください。
+実際の拡大倍率を取得するには UIScreen.main.nativeScale を利用します。ここで、すでに UIScreen.main は Deprecated ですが、残り余白は正確に書くには狭すぎるので、利用しました。ご了承ください。
 
 ```swift
-let retinaScale = UIScreen.main.scale       // Retina 倍率
-let nativeScale = UIScreen.main.nativeScale // 実際の倍率
+let retinaScale = UIScreen.main.scale       // Retina 倍率（端末ごとに固定）
+let nativeScale = UIScreen.main.nativeScale // 実際の倍率（設定により可変）
 ```
 
 HTML は端末の Retina 倍率を取得できますが、実際の倍率は取得できません。したがって、アプリから nativeScale の情報を WebView に渡します。例として、アプリ側でサイズを補正します。
@@ -379,7 +379,7 @@ let scaledSize = CGSize(width: 380 * scale, height: 160 * scale)
 
 ## まとめ
 
-iOS アプリに WKWebView を組み込む際に起こりうる問題とその解決方法を紹介しました。今回の実装例は次のリポジトリにあります。本記事の内容が皆様の開発のお役に立てば幸いです。WKWebView、難しい…
+iOS アプリに WKWebView を組み込む場合に起こりうる問題とその解決方法を紹介しました。今回の実装例は次のリポジトリにあります。本記事の内容が皆様の開発のお役に立てば幸いです。WKWebView、難しい…
 
 ```url
 https://github.com/mitsuharu/SampleWKWebViewApp
