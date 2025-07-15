@@ -156,7 +156,7 @@ HTML に組み込まれた関数を実行するには、その HTML の読み込
 
 ### 読み込み完了イベントが独自の場合
 
-HTML の実装や関数の特性によってはライフサイクルが独自な場合もあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。独自イベントを HTML に追加実装するには余白が足りないので、例として、一般的なイベント load、error、そして unhandledrejection を監視しました。
+HTML の実装や関数の特性によってはライフサイクルが独自な場合もあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。例として、独自イベントを HTML に追加実装するには余白が足りないので、一般的なイベント load、error、そして unhandledrejection を監視しました。
 
 ```swift
 extension ViewController {
@@ -248,7 +248,7 @@ func updateWebViewText(with text: String) {
 
 ## 関数実行のスコープ
 
-例で挙げた更新関数の実行は一度きりとは限らず、任意なタイミングや複数回で実行されるでしょう。たとえば、次のように、関数を連続して実行します。
+例で挙げた更新関数の実行は１回だけとは限らず、任意なタイミングやイベントにあわせて複数回実行されるでしょう。たとえば、次のように、関数を連続して実行します。
 
 ```swift
 updateWebViewText(with: "テキスト１")
@@ -273,7 +273,7 @@ const text = decodeURIComponent("テキスト１");
 window.setText(text);
 
 // Swift で updateWebViewText(with: "テキスト２") を実行した
-const text = decodeURIComponent("テキスト２"); // 同名定数の再定義！
+const text = decodeURIComponent("テキスト２"); // 同名定数の再定義でエラー！
 window.setText(text);
 ```
 
@@ -367,7 +367,7 @@ let scale = retinaScale / nativeScale
 let scaledSize = CGSize(width: 380 * scale, height: 160 * scale)
 ```
 
-そして、その補正されたサイズを CSS に注入します。
+そして、その補正されたサイズの CSS を HTML に注入します。
 
 ```css
 .box { width: \(scaledSize.width)px; height: \(scaledSize.height)px; }
