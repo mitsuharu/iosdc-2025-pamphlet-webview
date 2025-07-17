@@ -108,7 +108,7 @@ updateWebViewText(with: "こんにちは、iOSDC Japan 2025")
 
 次のようなエラーが JavaScript 側で発生しました。
 
-```javascript
+```log
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
 UserInfo={WKJavaScriptExceptionLineNumber=2, WKJavaScriptExceptionMessage
 =TypeError: window.setText is not a function. (In 'window.setText(text)',
@@ -216,7 +216,7 @@ extension ViewController: WKScriptMessageHandler {
 
 関数 `updateWebViewText(with:)` は Swift の文字列を JavaScript に直接渡しています。その渡す文字列に特殊文字（`"` や `\n` など）が含まれていると、エラーになります。
 
-```javascript
+```log
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
 UserInfo={WKJavaScriptExceptionLineNumber=1, WKJavaScriptExceptionMessage=
 SyntaxError: Unexpected EOF, WKJavaScriptExceptionColumnNumber=0, 
@@ -257,7 +257,7 @@ updateWebViewText(with: "テキスト２")
 
 残念ながら、この場合もエラーが起こります。
 
-```javascript
+```log
 Error Domain=WKErrorDomain Code=4 "A JavaScript exception occurred"
 UserInfo={WKJavaScriptExceptionLineNumber=0, WKJavaScriptExceptionMessage=
 SyntaxError: Can't create duplicate variable: 'text', 
