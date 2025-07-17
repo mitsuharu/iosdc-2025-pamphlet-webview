@@ -167,7 +167,7 @@ extension ViewController {
     let contentController = WKUserContentController()
     
     // イベント受け取りの設定
-    contentController.add(self, name: eventHandlerName)
+    contentController.add(self, name: eventName)
     
     // HTML に埋め込む JavaScript のコードの設定
     let source = """
