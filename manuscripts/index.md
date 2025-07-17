@@ -131,7 +131,7 @@ extension ViewController {
   // webView を初期設定する関数
   func loadWebView() {
     // ...
-    webView.navigationDelegate = self // 読み込みイベントを利用するためのデリゲート
+    webView.navigationDelegate = self // 読み込み完了を検知するためのデリゲート
     // ...
   }
 }
