@@ -131,7 +131,7 @@ extension ViewController {
   // webView を初期設定する関数
   func loadWebView() {
     // ...
-    webView.navigationDelegate = self // 読込みイベントを利用するためのデリゲート
+    webView.navigationDelegate = self // 読み込みイベントを利用するためのデリゲート
     // ...
   }
 }
@@ -248,7 +248,7 @@ func updateWebViewText(with text: String) {
 
 ## 関数実行のスコープ
 
-例で挙げた更新関数の実行は１回だけとは限らず、任意なタイミングやイベントにあわせて複数回実行されるでしょう。たとえば、次のように、関数を連続して実行します。
+例で挙げた更新関数の実行は１回だけとは限らず、任意なタイミングやイベントに合わせて複数回実行されるでしょう。たとえば、次のように、関数を連続して実行します。
 
 ```swift
 updateWebViewText(with: "テキスト１")
