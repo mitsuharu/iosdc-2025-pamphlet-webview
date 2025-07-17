@@ -156,36 +156,36 @@ HTML に組み込まれた関数を実行するには、その HTML の読み込
 
 ### 読み込み完了イベントが独自の場合
 
-HTML の実装や関数の特性によってはライフサイクルが独自な場合もあるでしょう。その場合、HTML が発行するイベントをアプリが受け取ることで解決することがあります（HTML の仕様は、その設計者に確認してください）。例として、独自イベントを HTML に追加実装するには余白が足りないので、一般的なイベント load、error、そして unhandledrejection を監視しました。
+HTML の実装や関数の特性によってはライフサイクルが独自な場合もあるでしょう。その場合、HTML が発行するイベントをアプリがメッセージとして受け取ることで解決することがあります。HTML の仕様は、その設計者に確認してください。例として、独自イベントを HTML に追加実装するには余白が足りないので、一般的なイベント load、error そして unhandledrejection を監視しました。
 
 ```swift
 extension ViewController {
   private func setUpWebView() {
-    // アプリで対応するイベント名を設定する
-    let eventName = "yourEventName"
+    // アプリで対応するメッセージ名を設定する
+    let messageName = "yourMessageName"
     
     let contentController = WKUserContentController()
     
-    // イベント受け取りの設定
-    contentController.add(self, name: eventName)
+    // アプリで受け取るメッセージを設定する
+    contentController.add(self, name: messageName)
     
-    // HTML に埋め込む JavaScript のコードの設定
+    // HTML に埋め込む JavaScript のコードを定義する
     let source = """
     window.addEventListener('load', (event) => {
       const message = {type: 'onLoad', message: event.message};
-      const jsonString = JSON.stringify(message);
-      window.webkit.messageHandlers.\(eventName).postMessage(jsonString);
+      const json = JSON.stringify(message);
+      window.webkit.messageHandlers.\(messageName).postMessage(json);
     });
     window.addEventListener('error', (event) => {
       const message = {type: 'onError',
                        message: event.error?.message ?? event.message};
-      const jsonString = JSON.stringify(message);
-      window.webkit.messageHandlers.\(eventName).postMessage(jsonString);
+      const json = JSON.stringify(message);
+      window.webkit.messageHandlers.\(messageName).postMessage(json);
     });
     window.addEventListener('unhandledrejection', (event) => {
-      const message = {type: 'onException', message: `${event.reason}`};
-      const jsonString = JSON.stringify(message);
-      window.webkit.messageHandlers.\(eventName).postMessage(jsonString);
+      const message = {type: 'onException', message: event.reason};
+      const json = JSON.stringify(message);
+      window.webkit.messageHandlers.\(messageName).postMessage(json);
     });
     """
 ```
@@ -204,7 +204,7 @@ extension ViewController {
 
 extension ViewController: WKScriptMessageHandler {
   func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-    // message.name はイベント受け取りで設定した eventName に対応する
+    // message.name はメッセージ受け取りで設定した messageName に対応する
     // message.body はメッセージ本文であり、この情報を利用してアプリで処理する
   }
 }
