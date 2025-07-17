@@ -233,7 +233,7 @@ func updateWebViewText(with text: String) {
   }
   // ↓ このコードブロックは、もはや Swift ではなく JavaScript です！
   let code = """
-  const text = decodeURIComponent("\(escapedText)");
+  const text = decodeURIComponent("\(encodedText)");
   window.setText(text);
   """
   webView.evaluateJavaScript(code) { _, error in
@@ -286,7 +286,7 @@ func updateWebViewText(with text: String) {
   }
   let code = """
   try {
-    const text = decodeURIComponent("\(escapedText)");
+    const text = decodeURIComponent("\(encodedText)");
     window.setText(text);
   } catch (error) {
     throw error
